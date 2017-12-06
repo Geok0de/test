@@ -19,6 +19,7 @@ public class UserRestController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	// /user/login POST REST API 추가하기...
 	@RequestMapping(value = "/user/login", method = RequestMethod.POST)
 	public ResponseEntity<String> login(UserInfo userInfo) {
 		// 아이디 존재 유무와 비밀번호 일치 여부 확인
