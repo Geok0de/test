@@ -39,11 +39,56 @@
 				contentType: false,
 				cache: false,
 				success: function(data, textStatus, xhr) {
+			/* 	if (typeof(Storage) !== 'undefined') {
+					   alert('ok');
+					}
+				else {
+					alert('not support');  지원하는지 확인하는 코드
+				} */
+					
 					$('#btnLogin').prop('disabled', false);
-					alert(data);
+
+                    var nextUrl = xhr.getResponseHeader('Location');
+
+						sessionStorage.setItem = ('base64Credentials', data);
+						
+					alert(nextUrl + " / " + sessionStorage.getItem('base64Credentials'));
 				},
 				error: function(error) {
 					$('#btnLogin').prop('disabled', false);
+					alert(error);
+				}
+			});
+		});
+
+		$('#btnJoinSubmit').click(function(e) {
+			// 기본 이벤트 동작하지 않도록 하기
+			e.preventDefault();
+
+			// form 가져오기
+			var form = $('#frmJoin')[0];
+
+			// FormData 객체 생성
+			var formData = new FormData(form);
+
+			// 두 번 실행 방지를 위해 버튼 비활성
+			$('#btnJoinSubmit').prop('disabled', true);
+			
+			$.ajax({
+				type: 'post',
+				url: REST_SERVICE_URI + '/user',
+				enctype: 'multipart/form-data',
+				data: formData,
+				processData: false,
+				contentType: false,
+				cache: false,
+				timeout: 60000,
+				success: function(data, textStatus, xhr) {
+					$('#btnJoinSubmit').prop('disabled', false);
+					$.mobile.changePage('index.html');
+				},
+				error: function(error) {
+					$('#btnJoinSubmit').prop('disabled', false);
 					alert(error);
 				}
 			});
@@ -60,14 +105,14 @@
 		<div data-role="content">
 			<form method="post" id="frmLogin">
 				<div data-role="fieldcontain">
-					<label for="email">이메일</label>
-					<input type="email" name="email" id="email">
+					<label for="email">이메일</label> <input type="email" name="email"
+						id="email">
 				</div>
 				<div data-role="fieldcontain">
-					<label for="password">비밀번호</label>
-					<input type="password" name="password" id="password">
+					<label for="password">비밀번호</label> <input type="password"
+						name="password" id="password">
 				</div>
-				
+
 				<div class="ui-grid-a">
 					<div class="ui-block-a">
 						<a href="join.html" data-role="button" id="btnJoin">회원 가입</a>
