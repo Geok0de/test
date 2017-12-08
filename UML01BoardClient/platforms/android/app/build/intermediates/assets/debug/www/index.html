@@ -28,7 +28,7 @@
 		   // FormData 객체 생성
 		   var formData = new FormData(form);
 
-		   // 두번 실행 방지를 우;해 버튼 비활성
+		   // 두번 실행 방지를 위해 버튼 비활성
 		   $('#btnLogin').prop('disabled', true);
 		   
        $.ajax({
@@ -46,6 +46,7 @@
                 	  $('#btnLogin').prop('disabled', false);
                 	  alert(error);
                       }
+       }
            });
 		   });
         

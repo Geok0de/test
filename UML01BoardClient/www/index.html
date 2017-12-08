@@ -15,42 +15,40 @@
 <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
 <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
 <script>
-   var REST_SERVICE_URI = 'http://192.168.0.25:8082/UML01Board/rest';
+	var REST_SERVICE_URI = 'http://192.168.0.25:8082/UML01Board/rest';
 
-   $(document).on('pagecreate', function() {
-	   $('#btnLogin').click(function(e) {
-		   // 기본 이벤트 동작하지 않도록 하기
-		   e.preventDefault();
+	$(document).on('pagecreate', function() {
+		$('#btnLogin').click(function(e) {
+			// 기본 이벤트 동작하지 않도록 하기
+			e.preventDefault();
 
-		   // form 가져오기
-		   var form = $('frmLogin')[0];
+			// form 가져오기
+			var form = $('#frmLogin')[0];
 
-		   // FormData 객체 생성
-		   var formData = new FormData(form);
+			// FormData 객체 생성
+			var formData = new FormData(form);
 
-		   // 두번 실행 방지를 우;해 버튼 비활성
-		   $('#btnLogin').prop('disabled', true);
-		   
-       $.ajax({
-              type: 'post', 
-              url: REST_SERVICE_URI + '/user/board', 
-              data:  formData, 
-              proccessData: false,
-              contentType: false,
-              cache: false,
-              success: function(data, textStatus, xhr) {
-            	  $('#btnLogin').prop('disabled', false);
-            	  alert(data);
-                  },
-                  error: function(error) {
-                	  $('#btnLogin').prop('disabled', false);
-                	  alert(error);
-                      }
-           });
-		   });
-        
-	   
-	   });
+			// 두 번 실행 방지를 위해 버튼 비활성
+			$('#btnLogin').prop('disabled', true);
+			
+			$.ajax({
+				type: 'post',
+				url: REST_SERVICE_URI + '/user/login',
+				data: formData,
+				processData: false,
+				contentType: false,
+				cache: false,
+				success: function(data, textStatus, xhr) {
+					$('#btnLogin').prop('disabled', false);
+					alert(data);
+				},
+				error: function(error) {
+					$('#btnLogin').prop('disabled', false);
+					alert(error);
+				}
+			});
+		});
+	});
 </script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.5.js"></script>
 </head>
@@ -62,20 +60,20 @@
 		<div data-role="content">
 			<form method="post" id="frmLogin">
 				<div data-role="fieldcontain">
-					<label for="email">이메일</label> <input type="email" name="email"
-						id="email">
+					<label for="email">이메일</label>
+					<input type="email" name="email" id="email">
 				</div>
 				<div data-role="fieldcontain">
-					<label for="password">비밀번호</label> <input type="password"
-						name="password" id="password">
+					<label for="password">비밀번호</label>
+					<input type="password" name="password" id="password">
 				</div>
-
+				
 				<div class="ui-grid-a">
 					<div class="ui-block-a">
-						<a href="#" data-role="button" id="btnJoin">회원 가입</a>
+						<a href="join.html" data-role="button" id="btnJoin">회원 가입</a>
 					</div>
 					<div class="ui-block-b">
-						<a href="#" data-role="button" id="btnJoin">로그인</a>
+						<a href="#" data-role="button" id="btnLogin">로그인</a>
 					</div>
 				</div>
 			</form>
