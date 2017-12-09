@@ -29,52 +29,63 @@ import com.koitt.board.service.UserInfoService;
 @Controller
 @RequestMapping("/rest")
 public class UserRestController {
-
+	
 	private static final String UPLOAD_FOLDER = "/avatar";
-
+	
 	private Logger logger = LogManager.getLogger(this.getClass());
-
+	
 	@Autowired
 	private UserInfoService userInfoService;
-
+	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
+	
 	// 사용자 로그인
 	@RequestMapping(value = "/user/login", method = RequestMethod.POST)
-	public ResponseEntity<String> login(UserInfo userInfo, UriComponentsBuilder ucBuilder) {
-
+	public ResponseEntity<String> login(UserInfo userInfo, 
+			UriComponentsBuilder ucBuilder) {
+		
 		logger.debug(userInfo);
-
+		
 		// 아이디 존재 유무와 비밀번호 일치 여부 확인
-		boolean isMatched = userInfoService.isPasswordMatched(userInfo.getEmail(), userInfo.getPassword());
-
+		boolean isMatched = userInfoService.isPasswordMatched(
+				userInfo.getId(),
+				userInfo.getPassword());
+		
 		if (isMatched) {
 			// Base64 인코딩 전 평문
-			String plainCredentials = userInfo.getEmail() + ":" + userInfo.getPassword();
-
+			String plainCredentials = 
+					userInfo.getEmail() + ":" + userInfo.getPassword();
+			
 			// 평문을 Base64로 인코딩
-			String base64Credentials = new String(Base64.encodeBase64(plainCredentials.getBytes()));
-
+			String base64Credentials = 
+					new String(
+							Base64.encodeBase64(plainCredentials.getBytes()
+					));
+			
 			logger.debug(base64Credentials);
-
+			
 			HttpHeaders headers = new HttpHeaders();
-			headers.setLocation(ucBuilder.path("/rest/user/{email}").buildAndExpand(userInfo.getEmail()).toUri());
-
-			// return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
-
+			headers.setLocation(ucBuilder.path("/rest/user/{id}")
+					.buildAndExpand(userInfo.getId())
+					.toUri());
+			
 			return new ResponseEntity<String>(base64Credentials, headers, HttpStatus.OK);
 		}
-
+		
 		logger.debug("login failed");
 		return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
 	}
-
+	
 	// 사용자 생성
 	@RequestMapping(value = "/user", method = RequestMethod.POST)
-	public ResponseEntity<Void> newUser(HttpServletRequest request, String email, String password, String name,
-			@RequestParam("avatar") MultipartFile avatar, UriComponentsBuilder ucBuilder)
-			throws CommonException, Exception {
+	public ResponseEntity<Void> newUser(HttpServletRequest request,
+			String email,
+			String password,
+			String name,
+			@RequestParam("avatar") MultipartFile avatar,
+			UriComponentsBuilder ucBuilder)
+					throws CommonException, Exception {
 
 		UserInfo user = new UserInfo();
 		user.setEmail(email);
@@ -98,7 +109,9 @@ public class UserRestController {
 			int idx = originalName.lastIndexOf(".");
 			String fileName = originalName.substring(0, idx);
 			String ext = originalName.substring(idx, originalName.length());
-			String uploadFilename = fileName + Long.toHexString(System.currentTimeMillis()) + ext;
+			String uploadFilename = fileName
+					+ Long.toHexString(System.currentTimeMillis())
+					+ ext;
 			avatar.transferTo(new File(path, uploadFilename));
 			uploadFilename = URLEncoder.encode(uploadFilename, "UTF-8");
 			user.setAvatar(uploadFilename);
@@ -107,26 +120,28 @@ public class UserRestController {
 		userInfoService.newUser(user);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("/rest/user/{email}").buildAndExpand(user.getEmail()).toUri());
-
+		headers.setLocation(ucBuilder.path("/rest/user/{id}")
+				.buildAndExpand(user.getId())
+				.toUri());
+		
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
-
+	
 	// 사용자 불러오기
-	@RequestMapping(value = "/user/{email}", method = RequestMethod.GET,
-			produces = { MediaType.APPLICATION_JSON_UTF8_VALUE,
-					   			MediaType.APPLICATION_XHTML_XML_VALUE })
-	public ResponseEntity<UserInfo> homePage(@PathVariable("email") String email) {
+	@RequestMapping(value = "/user/{id}", method = RequestMethod.GET,
+			produces = { MediaType.APPLICATION_JSON_UTF8_VALUE, 
+						MediaType.APPLICATION_XML_VALUE })
+	public ResponseEntity<UserInfo> homePage(@PathVariable("id") Integer id) {
 
 		// 로그인 된 상태이면
 		UserInfo item = null;
-		if (email != null && !email.trim().isEmpty()) {
-			item = userInfoService.detail(email);
+		if (id != null) {
+			item = userInfoService.detail(id);
 			
 			if (item != null) {
-			return new ResponseEntity<UserInfo>(item, HttpStatus.OK);
+				return new ResponseEntity<UserInfo>(item, HttpStatus.OK);
+			}
 		}
-	}
 
 		return new ResponseEntity<UserInfo>(new UserInfo(), HttpStatus.NO_CONTENT);
 	}
