@@ -10,7 +10,6 @@
 		<config>src/main/webapp/WEB-INF/dispatcher-servlet.xml</config>
 	</configs>
 	<autoconfigs>
-		<config>src/main/webapp/WEB-INF/applicationContext.xml</config>
 	</autoconfigs>
 	<configSets>
 	</configSets>
