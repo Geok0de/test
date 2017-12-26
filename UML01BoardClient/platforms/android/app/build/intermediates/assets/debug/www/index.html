@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
 <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
 <script>
-	var REST_SERVICE_URI = 'http://192.168.0.16:8082/UML01Board/rest';
+	var REST_SERVICE_URI = 'http://192.168.0.25:8082/UML01Board/rest';
 
 	$(document).on('pagecreate', function() {
 		$('#btnLogin').unbind('click');
@@ -34,19 +34,24 @@
 				contentType: false,
 				cache: false,
 				success: function(data, textStatus, xhr) {
-					alert(data);
-					
 					$('#btnLogin').prop('disabled', false);
 
 					var location = xhr.getResponseHeader('Location');
 
 					sessionStorage.setItem('base64Credentials', data);
 					sessionStorage.setItem('location', location);
+
+					// 사용자의 id값을 세션 저장소에 저장
+					var index = location.lastIndexOf('/');
+					var id = location.substring(index + 1);
+					sessionStorage.setItem('userInfoId', id);
+					
 					$.mobile.changePage('home.html');
 				},
-				error: function(error) {
+				error: function(jqXHR, textStatus, errorThrown) {
 					$('#btnLogin').prop('disabled', false);
-					alert(JSON.stringify(error));
+				   console.log('1');
+				   
 				}
 			});
 		});
@@ -188,15 +193,28 @@
 					// 수정하기 버튼
 					$('#btnBoardModify').unbind('click');
 					$('#btnBoardModify').click(function(e) {
-                         // 기본 동작 막기
-                         e.preventDefault();
+						// 기본 동작 막기
+						e.preventDefault();
 
-                         	var href = $('#btnBoardModify').attr('href');
-                         // 수정하고자 하는 게시물의 번호를 임시 저장
-                         	sessionStorage.setItem('location', 'board/' + data.no);
+						// 수정하고자 하는 게시물의 번호를 임시 저장
+						var href = $('#btnBoardModify').attr('href');
+						sessionStorage.setItem('location', 'board/' + data.no);
 
-                         	$.mobile.changePage(href);
-						});
+						$.mobile.changePage(href);
+					});
+
+					// 삭제하기 버튼
+					$('#btnBoardDelConfirm').unbind('click');
+					$('#btnBoardDelConfirm').click(function(e) {
+						// 기본 동작 막기
+						e.preventDefault();
+
+						// 삭제하고자 하는 게시물의 번호를 임시 저장
+						var href = $('#btnBoardDelConfirm').attr('href');
+						sessionStorage.setItem('location', 'board/' + data.no);
+
+						$.mobile.changePage(href);
+					});
 				},
 				error: function(error) {
 					alert(JSON.stringify(error));
@@ -246,29 +264,160 @@
 					}
 				});
 			});
+		}
+		// 글 수정하기 화면
+		else if (currentUrl.startsWith('/board-modify.html')) {
+			$.ajax({
+				type: 'get',
+				url: REST_SERVICE_URI + '/' + sessionStorage.getItem('location'),
+				headers: {
+					authorization: 'Basic ' + sessionStorage.getItem('base64Credentials')
+				},
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(data, textStatus, xhr) {
+					$('#board-modify-no-text').html(data.no);
+					$('#board-modify-name').html(data.userInfo.name);
+					$('#board-modify-title').val(data.title);
+					$('#board-modify-content').html(data.content);
 
-			// 글 수정하기 화면
-			else if (currentUrl.startsWith('/board-modify.html')) {
+					$('#btnBoardModifySubmit').unbind('click');
+					$('#btnBoardModifySubmit').click(function(e) {
+						// 기본 동작 막기
+						e.preventDefault();
+
+						// 두 번 실행 방지를 위해 버튼 비활성
+						$('#btnBoardModifySubmit').prop('disabled', true);
+
+						// form 가져오기
+						var form = $('#frmBoardModify')[0];
+
+						// FormData 객체 생성
+						var formData = new FormData(form);
+
+						// 수정한 내용 전송
+						$.ajax({
+							type: 'post',
+							url: REST_SERVICE_URI + '/' + sessionStorage.getItem('location'),
+							headers: {
+								authorization: 'Basic ' + sessionStorage.getItem('base64Credentials')
+							},
+							enctype: 'multipart/form-data',
+							data: formData,
+							processData: false,
+							contentType: false,
+							cache: false,
+							timeout: 60000,
+							success: function(data, textStatus, xhr) {
+								$('#btnBoardModifySubmit').prop('disabled', false);
+								$.mobile.changePage('board-list.html');
+							},
+							error: function(error) {
+								$('#btnBoardModifySubmit').prop('disabled', false);
+								alert(error);
+							}
+						});
+					});
+				},
+				error: function(error) {
+					alert(JSON.stringify(error));
+				}
+			});
+		}
+		// 글 삭제 확인 화면
+		else if (currentUrl.startsWith('/board-remove-confirm.html')) {
+			$('#btnBoardDelSubmit').unbind('click');
+			$('#btnBoardDelSubmit').click(function(e) {
+				// 기본 동작 막기
+				e.preventDefault();
+
+				// 두 번 실행 방지를 위해 버튼 비활성
+				$('#btnBoardDelSubmit').prop('disabled', true);
+
+				// 삭제
 				$.ajax({
-					type: 'get',
+					type: 'delete',
 					url: REST_SERVICE_URI + '/' + sessionStorage.getItem('location'),
 					headers: {
 						authorization: 'Basic ' + sessionStorage.getItem('base64Credentials')
 					},
-					contentType: 'application/json',
-					dataType: 'json',
+					contentType: false,
 					success: function(data, textStatus, xhr) {
-						$('#board-modify-no-text').html(data.no);
-						$('#board-modify-name').html(data.userInfo.name);
-						$('#board-modify-title').val(data.title);
-						$('#board-modify-content').html(data.content);
-						$('#board-modify-no').val(data.no);
-												
+						$('#btnBoardDelSubmit').prop('disabled', false);
+						$.mobile.changePage('board-list.html');
 					},
 					error: function(error) {
-						alert(JSON.stringify(error));
+						$('#btnBoardDelSubmit').prop('disabled', false);
+						alert(error);
 					}
 				});
+			});
+		}
+		// 회원정보수정 화면
+		else if (currentUrl.startsWith('/user-setting.html')) {
+			$.ajax({
+				type: 'get',
+				url: REST_SERVICE_URI + "/user/" + sessionStorage.getItem('userInfoId'),
+				headers: {
+					authorization: 'Basic ' + sessionStorage.getItem('base64Credentials')
+				},
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(data, textStatus, xhr) {
+					$('#user-setting-id').html(data.id);
+					$('#user-setting-email').html(data.email);
+					$('#user-setting-name').val(data.name);
+
+					$('#btnUserModifySubmit').unbind('click');
+					$('#btnUserModifySubmit').click(function(e) {
+						// 기본 동작 막기
+						e.preventDefault();
+
+						// 두 번 실행 방지를 위해 버튼 비활성
+						$('#btnUserModifySubmit').prop('disabled', true);
+
+						// form 가져오기
+						var form = $('#frmUserModify')[0];
+
+						// FormData 객체 생성
+						var formData = new FormData(form);
+
+						// 수정한 내용 전송
+						$.ajax({
+							type: 'post',
+							url: REST_SERVICE_URI + '/user/' + sessionStorage.getItem('userInfoId'),
+							headers: {
+								authorization: 'Basic ' + sessionStorage.getItem('base64Credentials')
+							},
+							enctype: 'multipart/form-data',
+							data: formData,
+							processData: false,
+							contentType: false,
+							cache: false,
+							timeout: 60000,
+							success: function(data, textStatus, xhr) {
+								$('#btnUserModifySubmit').prop('disabled', false);
+
+								// 변경된 비밀번호를 이용하여 base64Credentials 값 갱신
+								var email = $('#user-setting-email').html();
+								var newPassword = $('#user-setting-new-password').val();
+								var base64Credentials = btoa(email + ":" + newPassword);
+								sessionStorage.setItem('base64Credentials', base64Credentials);
+
+								// 홈 화면으로 이동
+								$.mobile.changePage('home.html');
+							},
+							error: function(error) {
+								$('#btnUserModifySubmit').prop('disabled', false);
+								alert(error);
+							}
+						});
+					});
+				},
+				error: function(error) {
+					alert(JSON.stringify(error));
+				}
+			});
 		}
 	});
 </script>

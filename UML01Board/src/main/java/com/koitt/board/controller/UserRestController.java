@@ -82,7 +82,7 @@ public class UserRestController {
 		}
 
 		logger.debug("login failed");
-		return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+		return new ResponseEntity<String>(HttpStatus.UNAUTHORIZED);
 	}
 
 	// 사용자 생성
