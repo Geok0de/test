@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.koitt.board.dao.BoardDao;
+import com.koitt.board.dao.MovieDao;
 import com.koitt.board.dao.UserInfoDao;
 import com.koitt.board.model.Board;
 import com.koitt.board.model.CommonException;
+import com.koitt.board.model.Movie;
 import com.koitt.board.model.UserInfo;
 import com.koitt.board.model.UserType;
 import com.koitt.board.model.UserTypeId;
@@ -28,6 +30,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 	
 	@Autowired
 	private BoardDao boardDao;
+	
+	
 
 	@Autowired
 	private PasswordEncoder encoder;
@@ -115,6 +119,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 		// 해당 사용자의 비밀번호와 입력한 비밀번호 비교한 결과 리턴
 		return encoder.matches(rawPassword, userInfo.getPassword());
 	}
+	
+
+
 
 	@Override
 	public UserInfo detail(String email) throws CommonException {

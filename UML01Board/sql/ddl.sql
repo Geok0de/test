@@ -1,49 +1,122 @@
-DROP TABLE user_info_type;
-DROP TABLE user_type;
-DROP SEQUENCE user_type_seq;
-DROP TABLE board;
-DROP SEQUENCE board_seq;
-DROP TABLE user_info;
-DROP SEQUENCE user_info_seq;
+
+CREATE TABLE coupon (
+   cno NUMBER NOT NULL,
+   sale VARCHAR2(150) NOT NULL,
+   CONSTRAINT pk_coupon PRIMARY KEY (cno)
+);
+
+
+-------------------------------------------------------------
 
 CREATE TABLE user_info (
-    id NUMBER NOT NULL,
+	id NUMBER NOT NULL,
 	email VARCHAR2(320) NOT NULL,
 	password VARCHAR2(60) NOT NULL,
 	name VARCHAR2(20) NOT NULL,
 	avatar VARCHAR2(255),
-	PRIMARY KEY (id)
+	cno NUMBER NULL,
+	CONSTRAINT pk_user_info PRIMARY KEY (id),
+	CONSTRAINT uk_user_info UNIQUE (email),
+	CONSTRAINT fk_coupon FOREIGN KEY (cno) REFERENCES coupon(cno)
 );
 
-CREATE SEQUENCE user_info_seq
-START WITH 1 INCREMENT BY 1;
 
-CREATE TABLE user_type (	
+-------------------------------------------------------------
+
+CREATE TABLE user_type (
 	id NUMBER NOT NULL,
 	type VARCHAR2(30) NOT NULL,
-	PRIMARY KEY (id)
+	CONSTRAINT pk_user_type PRIMARY KEY (id)
 );
 
-CREATE SEQUENCE user_type_seq
-START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE user_info_type (
 	user_info_id NUMBER NOT NULL,
 	user_type_id NUMBER NOT NULL,
-	PRIMARY KEY (user_info_id, user_type_id),
 	CONSTRAINT fk_user_info FOREIGN KEY (user_info_id) REFERENCES user_info (id),
 	CONSTRAINT fk_user_type FOREIGN KEY (user_type_id) REFERENCES user_type (id)
 );
 
+---------------------------------------------------------------
 CREATE TABLE board (
-   no 			NUMBER PRIMARY KEY,
+   no 			NUMBER,
    title  		VARCHAR2(100),
    content  	VARCHAR2(4000),
-     id			NUMBER,
+   id			NUMBER,
    regdate  	DATE,
    attachment	VARCHAR2(255),
+   CONSTRAINT pk_board PRIMARY KEY (no),
    CONSTRAINT fk_board FOREIGN KEY (id) REFERENCES user_info(id)
 );
 
-CREATE SEQUENCE board_seq
-START WITH 1 INCREMENT BY 1;
+
+------------------------------------------------------------------------------
+
+
+/* 영화관 */
+CREATE TABLE  theater (
+  the_no NUMBER   NOT NULL, /*극장 번호*/
+  the_name VARCHAR2(30),
+  CONSTRAINT pk_theater PRIMARY KEY(the_no)
+);
+
+
+
+
+/*상영관*/
+CREATE TABLE screen (
+  sc_no NUMBER NOT NULL, /* 상영관 번호 */
+  the_no NUMBER NOT NULL, /* 극장 번호*/
+  sc_name VARCHAR2(30) NOT NULL,  /* 상영관 이름*/
+  sc_line NUMBER NOT NULL, /* 라인 수*/
+  sc_seat NUMBER NOT NULL, /*좌석 수*/
+  CONSTRAINT pk_screen PRIMARY KEY (sc_no),
+  CONSTRAINT fk_screen FOREIGN KEY (the_no) REFERENCES theater(the_no)
+);
+
+CREATE TABLE movie (
+    mov_no NUMBER NOT NULL, /* 영화 번호*/
+    mov_title VARCHAR2(20) NOT NULL, /*영화 제목*/
+    mov_content VARCHAR2(100) NOT NULL, /*내용*/
+    mov_director VARCHAR2(100) NOT NULL, /*감독 */
+    mov_runtime NUMBER NOT NULL, /*상영 시간*/
+    mov_poster VARCHAR2(300),  /*포스터*/
+    CONSTRAINT pk_movie PRIMARY KEY(mov_no)
+
+  );
+  
+
+  
+/* 스케줄 */
+CREATE TABLE schedule (
+   sch_no NUMBER NOT NULL, /* 스케줄 번호*/
+   the_no NUMBER NOT NULL, /*극장번호*/
+   mov_no NUMBER NOT NULL, /* 영화 번호*/
+   sc_no NUMBER NOT NULL, /*상영관 번호*/
+   sch_starttime CHAR(8) NOT NULL, /* 시작 시간*/
+   CONSTRAINT pk_schedule PRIMARY KEY(sch_no),
+   CONSTRAINT fk_schedule_the FOREIGN KEY (the_no) REFERENCES theater(the_no),
+   CONSTRAINT fk_schedule_mov FOREIGN KEY (mov_no) REFERENCES movie( mov_no),
+    CONSTRAINT fk_schedule_scr FOREIGN KEY (sc_no) REFERENCES screen(sc_no)
+);
+
+  
+  
+
+/* 영화 티켓 */
+CREATE TABLE ticket(
+ tic_no NUMBER NOT NULL, /* 티켓번호 */
+ id NUMBER NOT NULL, /* 회원 아이디*/
+ sch_no NUMBER NOT NULL, /*스케줄 번호*/
+ tic_seatno VARCHAR2(400) NOT NULL, /*좌석 번호*/
+ CONSTRAINT pk_ticket PRIMARY KEY(tic_no),
+ CONSTRAINT fk_ticket_user FOREIGN KEY (id) REFERENCES user_info (id),
+ CONSTRAINT fk_ticket_sch FOREIGN KEY (sch_no) REFERENCES schedule (sch_no)
+ );
+
+ 
+ 
+
+
+
+
