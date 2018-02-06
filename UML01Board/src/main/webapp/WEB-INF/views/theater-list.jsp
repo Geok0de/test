@@ -9,23 +9,19 @@
 </head>
 <body>
 	<h1>영화 목록</h1>
-	<a href="<c:url value='/movie/movienew.do'/>">영화 등록</a>
+	<a href="<c:url value='/schedule/theaterlist.do'/>">양화관 목록으로 이동</a>
 	<a href="<c:url value='/'/>">홈으로</a>
 	<table border="1">
 		<tr>
-			<th>번호</th>
-			<th>제목</th>
-			<th>내용</th>
-			<th>감독</th>
-		</tr>
-		<c:forEach items="${ mlist }" var="mlist">
+			<th>영화관 번호</th>
+			<th>영화관 이름</th>
+					</tr>
+		<c:forEach items="${ thelist }" var="theater">
 			<tr>
 				<td><a
-					href="<c:url value='/movie/moviedetail.do?movieNo=${ mlist.movieNo }'/>">${ mlist.movieNo }</a></td>
-				<td>${ mlist.movietitle }</td>
-				<td>${ mlist.moviecontent }</td>
-				<td>${ mlist.moviedirector }</td>
-				</tr>
+					href="<c:url value='/schedule/theaterdetail.do?theNo=${ theater.theNo }'/>">${ theater.theNo }</a></td>
+				<td>${ theater.thename }</td>
+							</tr>
 		</c:forEach>
 	</table>
 </body>

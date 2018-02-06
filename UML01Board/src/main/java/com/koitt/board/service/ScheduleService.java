@@ -30,13 +30,15 @@ public interface ScheduleService {
 
 	// 영화관 수정하기
 	public int modifyTheater(Theater bas) throws CommonException;
-	
-	//스크린
+
+	// 스크린
 	public List<Screen> getScreenByNo(int theNo);
-	
+
 	// 예매 좌석
 	public boolean isReservedSeats(Ticket bas);
-
+	
+	//스케줄 갯수 가져오기
+	public int getScheduleCount(Screen bas) throws CommonException;
 
 	// 티켓 추가하기
 	public void newTicket(Ticket bas) throws CommonException;

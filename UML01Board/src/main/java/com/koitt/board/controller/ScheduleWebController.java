@@ -46,12 +46,7 @@ public class ScheduleWebController {
 	@Autowired
 	private MovieService movieService;
 
-	// 영화관 생성
-	@RequestMapping("/schedulenew.do")
-	@ResponseBody
-	public int addTheater(@ModelAttribute Theater bas) {
-		return scheduleService.newTheater(bas);
-	}
+
 
 	// 영화관 수정
 	@RequestMapping("/theatermodify.do")
@@ -63,40 +58,40 @@ public class ScheduleWebController {
 	// 상영관 목록 화면
 	@RequestMapping(value = "/theaterlist.do", method = RequestMethod.GET)
 	public String listTheater(Model model) throws CommonException {
-		List<Theater> list = null;
+		List<Theater> thelist = null;
 
-		list = scheduleService.Theaterlist();
+		thelist = scheduleService.Theaterlist();
 
-		logger.debug(list);
+		logger.debug(thelist);
 
-		model.addAttribute("list", list);
+		model.addAttribute("thelist", thelist);
 		return "theater-list";
 	}
 
 	// 스케줄 목록 화면
 	@RequestMapping(value = "/schedulelist.do", method = RequestMethod.GET)
 	public String listSchedule(Model model) throws CommonException {
-		List<Schedule> list = null;
+		List<Schedule> schlist = null;
 
-		list = scheduleService.Schedulelist();
+		schlist = scheduleService.Schedulelist();
 
-		logger.debug(list);
+		logger.debug(schlist);
 
-		model.addAttribute("list", list);
-		return "list";
+		model.addAttribute("schlist", schlist);
+		return "scheduleList";
 	}
 
 	// 티켓 목록 화면
 	@RequestMapping(value = "/ticketlist.do", method = RequestMethod.GET)
 	public String listTicket(Model model) throws CommonException {
-		List<Ticket> list = null;
+		List<Ticket> tlist = null;
 
-		list = scheduleService.Ticketlist();
+		tlist = scheduleService.Ticketlist();
 
-		logger.debug(list);
+		logger.debug(tlist);
 
-		model.addAttribute("list", list);
-		return "list";
+		model.addAttribute("tlist", tlist);
+		return "ticketList";
 	}
 
 	// 영화관 상세 화면
@@ -110,21 +105,10 @@ public class ScheduleWebController {
 
 		model.addAttribute("item", theater);
 
-		return "sdetail"; // /WEB-INF/views/detail.jsp 페이지로 이동
+		return "theater-detail"; // /WEB-INF/views/detail.jsp 페이지로 이동
 	}
 
-	// 스케줄 작성 화면
-	@RequestMapping(value = "/schedulenew.do", method = RequestMethod.GET)
-	public String newSchedule(Model model) {
 
-		String email = this.getPrincipal();
-		UserInfo item = userInfoService.detail(email);
-
-		model.addAttribute("id", item.getId());
-		model.addAttribute("email", item.getEmail());
-
-		return "snew";
-	}
 
 	// 스케줄 상세 화면
 	@RequestMapping(value = "/scheduledetail.do", method = RequestMethod.GET)
@@ -137,7 +121,7 @@ public class ScheduleWebController {
 
 		model.addAttribute("item", schedule);
 
-		return "rdetail";
+		return "schedule-detail";
 	}
 	
 	// 티켓 상세 화면
@@ -149,9 +133,9 @@ public class ScheduleWebController {
 
 		ticket = scheduleService.detailTicket(ticNo);
 
-		model.addAttribute("item", ticket);
+		model.addAttribute("ticket", ticket);
 
-		return "tdetail";
+		return "ticket-detail";
 	}
 
 	@RequestMapping(value = "/ticket.do", method = RequestMethod.GET)
@@ -162,13 +146,13 @@ public class ScheduleWebController {
 			model.addAttribute("movieNo", movieNo);
 			return "ticket";
 		}
-		return "login";
+		return "reservComplete";
 	}
 
 	@RequestMapping(value = "/ticket", method = RequestMethod.POST)
 	public String reserve(HttpSession session, HttpServletRequest request, HttpServletResponse response,
 			Integer movieNo, Integer ticNo, Integer id, Integer scNo, Integer schNo, String ticSeatno, Integer theNo,
-			String scName) throws CommonException, Exception {
+			String scname) throws CommonException, Exception {
 
 		String email = this.getPrincipal();
 		Ticket ticket = new Ticket();
@@ -182,22 +166,23 @@ public class ScheduleWebController {
 			ticket.setTicSeatno(ticSeatno);
 			schedule.setScNo(scNo);
 			schedule.setMovieNo(movieNo);
-			schedule.setScName(scName);
+			schedule.setScname(scname);
 
 			scheduleService.newTicket(ticket);
 
 		}
-		return "redirect:list.do";
+		return "redirect:ticketlist.do";
 
 	}
 
-	@RequestMapping(value = "/schedule.do", method = RequestMethod.GET)
+	//스케줄 작성
+	@RequestMapping(value = "/newschedule.do", method = RequestMethod.GET)
 	public String schedule(Model model, Integer movieNo) throws CommonException, UnsupportedEncodingException {
 		model.addAttribute("movieNo", movieNo);
-		return "movie-schedule";
+		return "scheduleList";
 	}
 
-	@RequestMapping(value = "/schedule", method = RequestMethod.POST)
+	@RequestMapping(value = "/newschedule", method = RequestMethod.POST)
 	public String schedule(HttpServletRequest request, Integer movieNo, Integer theNo, Integer scNo,
 			String schstarttime) throws CommonException, UnsupportedEncodingException {
 
